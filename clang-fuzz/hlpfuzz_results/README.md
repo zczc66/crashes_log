@@ -1,4 +1,4 @@
+# crashes_log
 The information of crashes using hlpfuzz
 Clang : 21.1.8
-Time ï¼š21h30min
-total 298 crashes,and xx kinds bugs
+Time £º21h30min
