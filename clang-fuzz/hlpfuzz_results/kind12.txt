@@ -1,0 +1,48 @@
+PoC：
+struct list_el { unsigned c : ( __builtin_bitreverse32 ( 0x80 ) ) ; int tree ; } Rcon [ 0xa7 ] = { 0x8d , ( 1 + ( 1 / ( ( 1 + ( 1 / ( ( 0 ) ) ) >> 4 ) ) ) ) , 0x02 , 0x04 , 0x08 , 0x10 , 0x20 , 0x40 , 0x80 , 0x1b , 0x36 } ;
+
+
+Reproduction:
+gdb -q --batch \
+    -x gdb_bt.cmd \
+    --args /home/user/repo/llvm-project/gllvm_build/bin/clang-fuzzer poc
+
+
+
+Crashing thread backtrace:
+Running LLVMFuzzerInitialize ...
+continue...
+
+Program received signal SIGSEGV, Segmentation fault.
+(anonymous namespace)::ConstStructBuilder::AppendBitField (this=this@entry=0x7fffffffb258, Field=Field@entry=0x55555e35d3c0, FieldOffset=0, C=C@entry=0x55555e368720, AllowOverwrite=156) at /home/user/repo/llvm-project/clang/lib/CodeGen/CGExprConstant.cpp:641
+641       if (Info.Size > FieldValue.getBitWidth())
+#0  (anonymous namespace)::ConstStructBuilder::AppendBitField (this=this@entry=0x7fffffffb258, Field=Field@entry=0x55555e35d3c0, FieldOffset=0, C=C@entry=0x55555e368720, AllowOverwrite=156) at /home/user/repo/llvm-project/clang/lib/CodeGen/CGExprConstant.cpp:641
+#1  0x0000555555d4bcaf in (anonymous namespace)::ConstStructBuilder::Build (this=0x80, this@entry=0x7fffffffb258, ILE=ILE@entry=0x55555e37dbd8, AllowOverwrite=<optimized out>) at /home/user/repo/llvm-project/clang/lib/CodeGen/CGExprConstant.cpp:782
+#2  0x0000555555d49765 in (anonymous namespace)::ConstStructBuilder::BuildStruct (Emitter=..., ILE=0x55555e37dbd8, ValTy=...) at /home/user/repo/llvm-project/clang/lib/CodeGen/CGExprConstant.cpp:906
+#3  (anonymous namespace)::ConstExprEmitter::EmitRecordInitialization (this=0x7fffffffb510, ILE=0x55555e37dbd8, T=...) at /home/user/repo/llvm-project/clang/lib/CodeGen/CGExprConstant.cpp:1386
+#4  (anonymous namespace)::ConstExprEmitter::VisitInitListExpr (this=0x7fffffffb510, ILE=0x55555e37dbd8, T=...) at /home/user/repo/llvm-project/clang/lib/CodeGen/CGExprConstant.cpp:1402
+#5  0x0000555555d31af7 in clang::CodeGen::ConstantEmitter::tryEmitPrivate (this=this@entry=0x7fffffffba80, E=E@entry=0x55555e37dbd8, destType=...) at /home/user/repo/llvm-project/clang/lib/CodeGen/CGExprConstant.cpp:1931
+#6  0x0000555555d35f01 in clang::CodeGen::ConstantEmitter::tryEmitAbstract (this=0x7fffffffba80, E=0x55555e37dbd8, destType=...) at /home/user/repo/llvm-project/clang/lib/CodeGen/CGExprConstant.cpp:1519
+#7  clang::CodeGen::ConstantEmitter::tryEmitAbstractForMemory (this=0x7fffffffba80, E=0x55555e37dbd8, destType=destType@entry=...) at /home/user/repo/llvm-project/clang/lib/CodeGen/CGExprConstant.cpp:1808
+#8  0x0000555555d49a6b in (anonymous namespace)::ConstExprEmitter::EmitArrayInitialization (this=0x20, ILE=0x55555e37d730, T=...) at /home/user/repo/llvm-project/clang/lib/CodeGen/CGExprConstant.cpp:1315
+#9  (anonymous namespace)::ConstExprEmitter::VisitInitListExpr (this=0x20, ILE=0x55555e37d730, T=...) at /home/user/repo/llvm-project/clang/lib/CodeGen/CGExprConstant.cpp:1399
+#10 0x0000555555d31964 in clang::CodeGen::ConstantEmitter::tryEmitPrivateForVarInit (this=this@entry=0x7fffffffba80, D=...) at /home/user/repo/llvm-project/clang/lib/CodeGen/CGExprConstant.cpp:1793
+#11 0x0000555555d341df in clang::CodeGen::ConstantEmitter::tryEmitForInitializer (this=0x7fffffffba80, D=...) at /home/user/repo/llvm-project/clang/lib/CodeGen/CGExprConstant.cpp:1572
+#12 0x0000555555f8e6b0 in clang::CodeGen::CodeGenModule::EmitGlobalVarDefinition (this=this@entry=0x55555e310300, D=D@entry=0x55555e35d670, IsTentative=false) at /home/user/repo/llvm-project/clang/lib/CodeGen/CodeGenModule.cpp:5458
+#13 0x0000555555f7e5bb in clang::CodeGen::CodeGenModule::EmitGlobalDefinition (this=this@entry=0x55555e310300, GD=..., GV=GV@entry=0x0) at /home/user/repo/llvm-project/clang/lib/CodeGen/CodeGenModule.cpp:4155
+#14 0x0000555555f85673 in clang::CodeGen::CodeGenModule::EmitGlobal (this=this@entry=0x55555e310300, GD=...) at /home/user/repo/llvm-project/clang/lib/CodeGen/CodeGenModule.cpp:3862
+#15 0x0000555555f7c9ea in clang::CodeGen::CodeGenModule::EmitTopLevelDecl (this=0x55555e310300, D=0x55555e35d670) at /home/user/repo/llvm-project/clang/lib/CodeGen/CodeGenModule.cpp:6891
+#16 0x0000555555b0db41 in (anonymous namespace)::CodeGeneratorImpl::HandleTopLevelDecl (this=0x55555e310140, DG=...) at /home/user/repo/llvm-project/clang/lib/CodeGen/ModuleBuilder.cpp:190
+#17 0x0000555555ad087d in clang::BackendConsumer::HandleTopLevelDecl (this=0x55555e2c9b30, D=...) at /home/user/repo/llvm-project/clang/lib/CodeGen/CodeGenAction.cpp:199
+#18 0x0000555557cdffda in clang::ParseAST (S=..., PrintStats=false, SkipFunctionBodies=<optimized out>) at /home/user/repo/llvm-project/clang/lib/Parse/ParseAST.cpp:175
+#19 0x0000555557b850e6 in clang::FrontendAction::Execute (this=0x55555e2c97b0) at /home/user/repo/llvm-project/clang/lib/Frontend/FrontendAction.cpp:1078
+#20 0x0000555557a4ae01 in clang::CompilerInstance::ExecuteAction (this=0x7fffffffd8f8, Act=...) at /home/user/repo/llvm-project/clang/lib/Frontend/CompilerInstance.cpp:1061
+#21 0x0000555557a02502 in clang::tooling::FrontendActionFactory::runInvocation (this=0x55555e2c1ef0, Invocation=..., Files=0x55555e2c6640, PCHContainerOps=..., DiagConsumer=0x7fffffffdac0) at /home/user/repo/llvm-project/clang/lib/Tooling/Tooling.cpp:465
+#22 0x0000555555acd136 in clang_fuzzer::HandleCXX (S="struct list_el { unsigned c : ( __builtin_bitreverse32 ( 0x80 ) ) ; int tree ; } Rcon [ 0xa7 ] = { 0x8d , ( 1 + ( 1 / ( ( 1 + ( 1 / ( ( 0 ) ) ) >> 4 ) ) ) ) , 0x02 , 0x04 , 0x08 , 0x10 , 0x20 , 0x40 ,"..., FileName=<optimized out>, ExtraArgs=std::vector of length 1, capacity 1 = {...}) at /home/user/repo/llvm-project/clang/tools/clang-fuzzer/handle-cxx/handle_cxx.cpp:49
+#23 0x0000555555accad4 in LLVMFuzzerTestOneInput (data=0x7ffff4be4010 "struct list_el { unsigned c : ( __builtin_bitreverse32 ( 0x80 ) ) ; int tree ; } Rcon [ 0xa7 ] = { 0x8d , ( 1 + ( 1 / ( ( 1 + ( 1 / ( ( 0 ) ) ) >> 4 ) ) ) ) , 0x02 , 0x04 , 0x08 , 0x10 , 0x20 , 0x40 ,"..., size=<optimized out>) at /home/user/repo/llvm-project/clang/tools/clang-fuzzer/ClangFuzzer.cpp:23
+#24 0x000055555c6f96ee in ExecuteFilesOnyByOne (argc=2, argv=0x7fffffffe348, callback=callback@entry=0x555555acc990 <LLVMFuzzerTestOneInput(uint8_t*, size_t)>) at aflpp_driver.c:256
+#25 0x000055555c6f94de in LLVMFuzzerRunDriver (argcp=argcp@entry=0x7fffffffe214, argvp=argvp@entry=0x7fffffffe218, callback=0x555555acc990 <LLVMFuzzerTestOneInput(uint8_t*, size_t)>) at aflpp_driver.c:377
+#26 0x000055555c6f901e in main (argc=argc@entry=2, argv=argv@entry=0x7fffffffe348) at aflpp_driver.c:312
+#27 0x00007ffff7a63d90 in __libc_start_call_main (main=main@entry=0x55555c6f8f60 <main>, argc=argc@entry=2, argv=argv@entry=0x7fffffffe348) at ../sysdeps/nptl/libc_start_call_main.h:58
+#28 0x00007ffff7a63e40 in __libc_start_main_impl (main=0x55555c6f8f60 <main>, argc=2, argv=0x7fffffffe348, init=<optimized out>, fini=<optimized out>, rtld_fini=<optimized out>, stack_end=0x7fffffffe338) at ../csu/libc-start.c:392
+#29 0x0000555555acc8b5 in _start ()

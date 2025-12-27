@@ -1,0 +1,49 @@
+PoC：
+void test ( ) { unsigned long long a = 18446744073709551615ULL ; unsigned long long b = 1 ; unsigned long long result ; bool overflow = __builtin_sub_overflow ( a , b , & result ) ; unsigned long long c = 0 ; unsigned long long d = 1 ; bool overflow2 = __builtin_sub_overflow ( c , d , & result ) ; static constexpr unsigned long long i , sum = ( i ++ < ( - ( ( 1 / ( ( ( 0.0 / ( 1 / ( 0x97 + ( sizeof ( * "%f%f%f" ) ) ) ) ) ) ) ) ) / ( 1 + ( 0.0 ) ) ) - 1 ) ; static constexpr unsigned long long f = 50 ; static constexpr struct AES_ctx state_t [ 4 ] [ ( { i ++ ; for ( i = 1 ; i <= 10 ; i ++ ) { curr = ( node * ) malloc ( sizeof i ++ ) ; curr -> left = curr -> right = NULL ; curr -> val = rand ( ) ; insert ( & root , curr ) ; } printf ( "%d\n" , i ) ; label : } ) ++ ] = ( 1 / ( ( 0 ) ) ) % 2 == ( 1 + ( - ( ( sizeof ( __builtin_printf ( "%d" , c ) ) ) ) ) ) ; }
+
+
+Reproduction:
+gdb -q --batch \
+    -x gdb_bt.cmd \
+    --args /home/user/repo/llvm-project/gllvm_build/bin/clang-fuzzer poc
+
+
+
+Crashing thread backtrace:
+Running LLVMFuzzerInitialize ...
+continue...
+
+Program received signal SIGSEGV, Segmentation fault.
+clang::CXXRecordDecl::hasMutableFields (this=0x55555e379998) at /home/user/repo/llvm-project/clang/include/clang/AST/DeclCXX.h:1241
+1241      bool hasMutableFields() const { return data().HasMutableFields; }
+#0  clang::CXXRecordDecl::hasMutableFields (this=0x55555e379998) at /home/user/repo/llvm-project/clang/include/clang/AST/DeclCXX.h:1241
+#1  clang::QualType::isNonConstantStorage (this=0x7fffffff7028, Ctx=..., ExcludeCtor=true, ExcludeDtor=52) at /home/user/repo/llvm-project/clang/lib/AST/Type.cpp:126
+#2  0x0000555558460e3e in clang::Sema::CheckCompleteVariableDeclaration (this=this@entry=0x55555e349730, var=<optimized out>, var@entry=0x55555e37a310) at /home/user/repo/llvm-project/clang/lib/Sema/SemaDecl.cpp:14417
+#3  0x000055555845e9da in clang::Sema::AddInitializerToDecl (this=0x55555e349730, RealDecl=<optimized out>, Init=<optimized out>, DirectInit=196) at /home/user/repo/llvm-project/clang/lib/Sema/SemaDecl.cpp:13760
+#4  0x0000555557d358e7 in clang::Parser::ParseDeclarationAfterDeclaratorAndAttributes (this=this@entry=0x55555e356b00, D=..., TemplateInfo=..., FRI=FRI@entry=0x0) at /home/user/repo/llvm-project/clang/lib/Parse/ParseDecl.cpp:2823
+#5  0x0000555557d30890 in clang::Parser::ParseDeclGroup (this=this@entry=0x55555e356b00, DS=..., Context=Context@entry=clang::DeclaratorContext::Block, Attrs=..., TemplateInfo=..., DeclEnd=0x7fffffffb040, FRI=0x0) at /home/user/repo/llvm-project/clang/lib/Parse/ParseDecl.cpp:2516
+#6  0x0000555557d2e5d0 in clang::Parser::ParseSimpleDeclaration (this=this@entry=0x55555e356b00, Context=clang::DeclaratorContext::Block, Context@entry=clang::DeclaratorContext::File, DeclEnd=..., DeclAttrs=..., DeclSpecAttrs=..., RequireSemi=84, FRI=0x0, DeclSpecStart=0x0) at /home/user/repo/llvm-project/clang/lib/Parse/ParseDecl.cpp:2135
+#7  0x0000555557d2dabc in clang::Parser::ParseDeclaration (this=0x55555e356b00, Context=1580702104, DeclEnd=..., DeclAttrs=..., DeclSpecAttrs=..., DeclSpecStart=0x0) at /home/user/repo/llvm-project/clang/lib/Parse/ParseDecl.cpp:2028
+#8  0x0000555557e50a55 in clang::Parser::ParseStatementOrDeclarationAfterAttributes (this=this@entry=0x55555e356b00, Stmts=..., StmtCtx=StmtCtx@entry=clang::Parser::ParsedStmtContext::Compound, TrailingElseLoc=TrailingElseLoc@entry=0x0, CXX11Attrs=..., GNUAttrs=...) at /home/user/repo/llvm-project/clang/lib/Parse/ParseStmt.cpp:259
+#9  0x0000555557e4e4f5 in clang::Parser::ParseStatementOrDeclaration (this=this@entry=0x55555e356b00, Stmts=..., StmtCtx=4107161812, StmtCtx@entry=clang::Parser::ParsedStmtContext::Compound, TrailingElseLoc=0x7ffff4ce5010, TrailingElseLoc@entry=0x0) at /home/user/repo/llvm-project/clang/lib/Parse/ParseStmt.cpp:124
+#10 0x0000555557e5f14c in clang::Parser::ParseCompoundStatementBody (this=this@entry=0x55555e356b00, isStmtExpr=128) at /home/user/repo/llvm-project/clang/lib/Parse/ParseStmt.cpp:1248
+#11 0x0000555557e612da in clang::Parser::ParseFunctionStatementBody (this=0x55555e356b00, Decl=0x55555e35d130, BodyScope=...) at /home/user/repo/llvm-project/clang/lib/Parse/ParseStmt.cpp:2526
+#12 0x0000555557cf1009 in clang::Parser::ParseFunctionDefinition (this=0x55555e356b00, D=..., TemplateInfo=..., LateParsedAttrs=0x7fffffffbaa0) at /home/user/repo/llvm-project/clang/lib/Parse/Parser.cpp:1525
+#13 0x0000555557d31fe5 in clang::Parser::ParseDeclGroup (this=0x55555e356b00, DS=..., Context=clang::DeclaratorContext::File, Attrs=..., TemplateInfo=..., DeclEnd=0x0, FRI=0x0) at /home/user/repo/llvm-project/clang/lib/Parse/ParseDecl.cpp:2402
+#14 0x0000555557ceed0b in clang::Parser::ParseDeclOrFunctionDefInternal (this=this@entry=0x55555e356b00, Attrs=..., DeclSpecAttrs=..., DS=..., AS=AS@entry=clang::AS_none) at /home/user/repo/llvm-project/clang/lib/Parse/Parser.cpp:1249
+#15 0x0000555557cedee1 in clang::Parser::ParseDeclarationOrFunctionDefinition (this=this@entry=0x55555e356b00, Attrs=..., DeclSpecAttrs=..., DS=DS@entry=0x55555e356b00, AS=1567198752, AS@entry=clang::AS_none) at /home/user/repo/llvm-project/clang/lib/Parse/Parser.cpp:1271
+#16 0x0000555557cec26d in clang::Parser::ParseExternalDeclaration (this=this@entry=0x55555e356b00, Attrs=..., DeclSpecAttrs=..., DS=0x7ffff4ce5010, DS@entry=0x0) at /home/user/repo/llvm-project/clang/lib/Parse/Parser.cpp:1074
+#17 0x0000555557ce8f6b in clang::Parser::ParseTopLevelDecl (this=this@entry=0x55555e356b00, Result=..., ImportState=@0x7fffffffd744: clang::Sema::ModuleImportState::FirstDecl) at /home/user/repo/llvm-project/clang/lib/Parse/Parser.cpp:763
+#18 0x0000555557ce824f in clang::Parser::ParseFirstTopLevelDecl (this=0x55555e356b00, Result=..., ImportState=@0x7fffffffd744: clang::Sema::ModuleImportState::FirstDecl) at /home/user/repo/llvm-project/clang/lib/Parse/Parser.cpp:608
+#19 0x0000555557cdff8d in clang::ParseAST (S=..., PrintStats=false, SkipFunctionBodies=<optimized out>) at /home/user/repo/llvm-project/clang/lib/Parse/ParseAST.cpp:170
+#20 0x0000555557b850e6 in clang::FrontendAction::Execute (this=0x55555e2c9a30) at /home/user/repo/llvm-project/clang/lib/Frontend/FrontendAction.cpp:1078
+#21 0x0000555557a4ae01 in clang::CompilerInstance::ExecuteAction (this=0x7fffffffd8f8, Act=...) at /home/user/repo/llvm-project/clang/lib/Frontend/CompilerInstance.cpp:1061
+#22 0x0000555557a02502 in clang::tooling::FrontendActionFactory::runInvocation (this=0x55555e2c1ef0, Invocation=..., Files=0x55555e2c68c0, PCHContainerOps=..., DiagConsumer=0x7fffffffdac0) at /home/user/repo/llvm-project/clang/lib/Tooling/Tooling.cpp:465
+#23 0x0000555555acd136 in clang_fuzzer::HandleCXX (S="void test ( ) { unsigned long long a = 18446744073709551615ULL ; unsigned long long b = 1 ; unsigned long long result ; bool overflow = __builtin_sub_overflow ( a , b , & result ) ; unsigned long long"..., FileName=<optimized out>, ExtraArgs=std::vector of length 1, capacity 1 = {...}) at /home/user/repo/llvm-project/clang/tools/clang-fuzzer/handle-cxx/handle_cxx.cpp:49
+#24 0x0000555555accad4 in LLVMFuzzerTestOneInput (data=0x7ffff4be4010 "void test ( ) { unsigned long long a = 18446744073709551615ULL ; unsigned long long b = 1 ; unsigned long long result ; bool overflow = __builtin_sub_overflow ( a , b , & result ) ; unsigned long long"..., size=<optimized out>) at /home/user/repo/llvm-project/clang/tools/clang-fuzzer/ClangFuzzer.cpp:23
+#25 0x000055555c6f96ee in ExecuteFilesOnyByOne (argc=2, argv=0x7fffffffe348, callback=callback@entry=0x555555acc990 <LLVMFuzzerTestOneInput(uint8_t*, size_t)>) at aflpp_driver.c:256
+#26 0x000055555c6f94de in LLVMFuzzerRunDriver (argcp=argcp@entry=0x7fffffffe214, argvp=argvp@entry=0x7fffffffe218, callback=0x555555acc990 <LLVMFuzzerTestOneInput(uint8_t*, size_t)>) at aflpp_driver.c:377
+#27 0x000055555c6f901e in main (argc=argc@entry=2, argv=argv@entry=0x7fffffffe348) at aflpp_driver.c:312
+#28 0x00007ffff7a63d90 in __libc_start_call_main (main=main@entry=0x55555c6f8f60 <main>, argc=argc@entry=2, argv=argv@entry=0x7fffffffe348) at ../sysdeps/nptl/libc_start_call_main.h:58
+#29 0x00007ffff7a63e40 in __libc_start_main_impl (main=0x55555c6f8f60 <main>, argc=2, argv=0x7fffffffe348, init=<optimized out>, fini=<optimized out>, rtld_fini=<optimized out>, stack_end=0x7fffffffe338) at ../csu/libc-start.c:392
+#30 0x0000555555acc8b5 in _start ()

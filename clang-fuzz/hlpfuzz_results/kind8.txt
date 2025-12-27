@@ -1,0 +1,50 @@
+PoC：
+struct tree_el { struct test44_d { struct tree_el { struct list_el { struct tree_el { struct S { struct tree_el { struct test44_d { struct list_el { struct fn_1 { unsigned a : 13 ; unsigned b : 0xda ; } state_t [ 4 ] [ 0x11 ] ; struct list_el * next ; } val ; struct tree_el { int val ; struct list_el { int i ( ) , * a3 ( ) ; struct list_el fn_7 ( int p , int q , int r , int s , int t ) ; } Rcon [ 0x56 ] ; } * right , y [ 0x43 ] ; } val ; struct fn_12 * right , * left ; } val ; int se , * a3 ( ) ; } val ; int state_t [ 4 ] [ ( 27 ) ] ; } state_t [ 4 ] [ 4 ] ; struct fn_11 * argv [ ] ; } val ; struct fn_12 * right , * left ; } val ; int se , * a3 ( ) ; } val ; int fn_9 ; } Rcon [ ( ( __uint128_t ) 36 * 0x100000000 ) ] = { { ( bool ( 1 ) ) , 0x01 , ( ( - 1 ) ) , 0x04 , 0x04 , 0x10 , 0x85 , 0x40 , ( 1 + ( ( 0xe7 / ( ( ( 0.0 ) ) - 0x80 ) ) * 0x1b ) ) , 0x1b , 0x36 } , 0x01 , 0x02 , 0x04 , 0 , 0x10 , 0x20 , 0x40 , 1 + ( 1 / ( ( 0 ) ) ) , 0x1b , 0x36 } ;
+
+
+Reproduction:
+gdb -q --batch \
+    -x gdb_bt.cmd \
+    --args /home/user/repo/llvm-project/gllvm_build/bin/clang-fuzzer poc
+
+
+
+Crashing thread backtrace:
+Running LLVMFuzzerInitialize ...
+continue...
+LLVM ERROR: SmallVector unable to grow. Requested capacity (154618822656) is larger than maximum value for size type (4294967295)
+
+Program received signal SIGABRT, Aborted.
+__pthread_kill_implementation (no_tid=0, signo=6, threadid=140737348065280) at ./nptl/pthread_kill.c:44
+44      ./nptl/pthread_kill.c: No such file or directory.
+#0  __pthread_kill_implementation (no_tid=0, signo=6, threadid=140737348065280) at ./nptl/pthread_kill.c:44
+#1  __pthread_kill_internal (signo=6, threadid=140737348065280) at ./nptl/pthread_kill.c:78
+#2  __GI___pthread_kill (threadid=140737348065280, signo=signo@entry=6) at ./nptl/pthread_kill.c:89
+#3  0x00007ffff7a7c476 in __GI_raise (sig=sig@entry=6) at ../sysdeps/posix/raise.c:26
+#4  0x00007ffff7a627f3 in __GI_abort () at ./stdlib/abort.c:79
+#5  0x000055555c56d3e0 in llvm::report_fatal_error (Reason=..., GenCrashDiag=true) at /home/user/repo/llvm-project/llvm/lib/Support/ErrorHandling.cpp:123
+#6  0x000055555c5c744f in report_size_overflow (MinSize=<optimized out>, MaxSize=4294967295) at /home/user/repo/llvm-project/llvm/lib/Support/SmallVector.cpp:70
+#7  0x000055555c5c6aca in getNewCapacity<unsigned int> (MinSize=6, OldCapacity=<optimized out>, TSize=<optimized out>) at /home/user/repo/llvm-project/llvm/lib/Support/SmallVector.cpp:96
+#8  llvm::SmallVectorBase<unsigned int>::grow_pod (this=<optimized out>, FirstEl=0x7fffffffb720, MinSize=6, TSize=<optimized out>) at /home/user/repo/llvm-project/llvm/lib/Support/SmallVector.cpp:140
+#9  0x0000555555d49b85 in (anonymous namespace)::ConstExprEmitter::EmitArrayInitialization (this=0x7fffffffb990, ILE=0x55555e38dc00, T=...) at /home/user/repo/llvm-project/llvm/include/llvm/ADT/SmallVector.h:152
+#10 (anonymous namespace)::ConstExprEmitter::VisitInitListExpr (this=0x7fffffffb990, ILE=0x55555e38dc00, T=...) at /home/user/repo/llvm-project/clang/lib/CodeGen/CGExprConstant.cpp:1399
+#11 0x0000555555d31964 in clang::CodeGen::ConstantEmitter::tryEmitPrivateForVarInit (this=this@entry=0x7fffffffba80, D=...) at /home/user/repo/llvm-project/clang/lib/CodeGen/CGExprConstant.cpp:1793
+#12 0x0000555555d341df in clang::CodeGen::ConstantEmitter::tryEmitForInitializer (this=0x7fffffffba80, D=...) at /home/user/repo/llvm-project/clang/lib/CodeGen/CGExprConstant.cpp:1572
+#13 0x0000555555f8e6b0 in clang::CodeGen::CodeGenModule::EmitGlobalVarDefinition (this=this@entry=0x55555e3105e0, D=D@entry=0x55555e3861b0, IsTentative=false) at /home/user/repo/llvm-project/clang/lib/CodeGen/CodeGenModule.cpp:5458
+#14 0x0000555555f7e5bb in clang::CodeGen::CodeGenModule::EmitGlobalDefinition (this=this@entry=0x55555e3105e0, GD=..., GV=GV@entry=0x0) at /home/user/repo/llvm-project/clang/lib/CodeGen/CodeGenModule.cpp:4155
+#15 0x0000555555f85673 in clang::CodeGen::CodeGenModule::EmitGlobal (this=this@entry=0x55555e3105e0, GD=...) at /home/user/repo/llvm-project/clang/lib/CodeGen/CodeGenModule.cpp:3862
+#16 0x0000555555f7c9ea in clang::CodeGen::CodeGenModule::EmitTopLevelDecl (this=0x55555e3105e0, D=0x55555e3861b0) at /home/user/repo/llvm-project/clang/lib/CodeGen/CodeGenModule.cpp:6891
+#17 0x0000555555b0db41 in (anonymous namespace)::CodeGeneratorImpl::HandleTopLevelDecl (this=0x55555e310420, DG=...) at /home/user/repo/llvm-project/clang/lib/CodeGen/ModuleBuilder.cpp:190
+#18 0x0000555555ad087d in clang::BackendConsumer::HandleTopLevelDecl (this=0x55555e2c9e10, D=...) at /home/user/repo/llvm-project/clang/lib/CodeGen/CodeGenAction.cpp:199
+#19 0x0000555557cdffda in clang::ParseAST (S=..., PrintStats=false, SkipFunctionBodies=<optimized out>) at /home/user/repo/llvm-project/clang/lib/Parse/ParseAST.cpp:175
+#20 0x0000555557b850e6 in clang::FrontendAction::Execute (this=0x55555e2c9a90) at /home/user/repo/llvm-project/clang/lib/Frontend/FrontendAction.cpp:1078
+#21 0x0000555557a4ae01 in clang::CompilerInstance::ExecuteAction (this=0x7fffffffd8f8, Act=...) at /home/user/repo/llvm-project/clang/lib/Frontend/CompilerInstance.cpp:1061
+#22 0x0000555557a02502 in clang::tooling::FrontendActionFactory::runInvocation (this=0x55555e2c1ef0, Invocation=..., Files=0x55555e2c6920, PCHContainerOps=..., DiagConsumer=0x7fffffffdac0) at /home/user/repo/llvm-project/clang/lib/Tooling/Tooling.cpp:465
+#23 0x0000555555acd136 in clang_fuzzer::HandleCXX (S="struct tree_el { struct test44_d { struct tree_el { struct list_el { struct tree_el { struct S { struct tree_el { struct test44_d { struct list_el { struct fn_1 { unsigned a : 13 ; unsigned b : 0xda ;"..., FileName=<optimized out>, ExtraArgs=std::vector of length 1, capacity 1 = {...}) at /home/user/repo/llvm-project/clang/tools/clang-fuzzer/handle-cxx/handle_cxx.cpp:49
+#24 0x0000555555accad4 in LLVMFuzzerTestOneInput (data=0x7ffff4be4010 "struct tree_el { struct test44_d { struct tree_el { struct list_el { struct tree_el { struct S { struct tree_el { struct test44_d { struct list_el { struct fn_1 { unsigned a : 13 ; unsigned b : 0xda ;"..., size=<optimized out>) at /home/user/repo/llvm-project/clang/tools/clang-fuzzer/ClangFuzzer.cpp:23
+#25 0x000055555c6f96ee in ExecuteFilesOnyByOne (argc=2, argv=0x7fffffffe348, callback=callback@entry=0x555555acc990 <LLVMFuzzerTestOneInput(uint8_t*, size_t)>) at aflpp_driver.c:256
+#26 0x000055555c6f94de in LLVMFuzzerRunDriver (argcp=argcp@entry=0x7fffffffe214, argvp=argvp@entry=0x7fffffffe218, callback=0x555555acc990 <LLVMFuzzerTestOneInput(uint8_t*, size_t)>) at aflpp_driver.c:377
+#27 0x000055555c6f901e in main (argc=argc@entry=2, argv=argv@entry=0x7fffffffe348) at aflpp_driver.c:312
+#28 0x00007ffff7a63d90 in __libc_start_call_main (main=main@entry=0x55555c6f8f60 <main>, argc=argc@entry=2, argv=argv@entry=0x7fffffffe348) at ../sysdeps/nptl/libc_start_call_main.h:58
+#29 0x00007ffff7a63e40 in __libc_start_main_impl (main=0x55555c6f8f60 <main>, argc=2, argv=0x7fffffffe348, init=<optimized out>, fini=<optimized out>, rtld_fini=<optimized out>, stack_end=0x7fffffffe338) at ../csu/libc-start.c:392
+#30 0x0000555555acc8b5 in _start ()

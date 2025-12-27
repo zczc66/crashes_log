@@ -1,10 +1,80 @@
 PoC：
-
+void fn_4 ( double * a , double * b , double * c ) { int i = 0 ; while ( i < 10 ) a [ sizeof ( 0x11 ) / 0xbf ] = i ++ * c [ ( { struct tree_el { int val ; int insert ( const MyType Rcon [ thousands [ 0xec ] != ( ( y >> 2 & ( sizeof ( foo ( tempa [ printf ( "sum = %d\n" , ( cnt ) [ foo ( tempa [ printf ( "sum = %d\n" , ( cnt ) [ a3 = ( CustomType * ) ( b3 ) ] [ 2 ] ) ] ) ] [ 2 ] ) ] ) ) ) ) * xtime ( xtime ( x ) ) ) [ i ] * c [ i ] ] , int ( * f2 ) ( node * * tree , node * item ) ) ( node * tree ) ; } i , state_t [ 4 ] [ ( ( 0x52 >> 7 ) & 1 / ( 1 / ( 1 / ( ( ( 0x52 >> 7 ) & 1 / ( ( ( 0x52 >> 7 ) & 1 / ( 1 + ( sizeof ( set_up_dialog ( printf ( "\nrefined value of n and h are:%d  %f\n" , printf ( "sum = %d\n" , Nr + 1 ) , h ) , 0 , 0 ) ) ) ) ) + ( 1 / ( ( 0 ) ) ) ) ) * 0x1b ) ) ) ) + ( 1 / ( ( 0 ) ) ) ] [ 4 ] = 0 ; 0x97 < 10000 ; } ) << 1 ] ; i ++ ; }
 
 
 Reproduction:
-
+gdb -q --batch \
+    -x gdb_bt.cmd \
+    --args /home/user/repo/llvm-project/gllvm_build/bin/clang-fuzzer poc
 
 
 
 Crashing thread backtrace:
+Program received signal SIGSEGV, Segmentation fault.
+clang::DecltypeType::isSugared (this=0x55555e176240) at /home/user/repo/llvm-project/clang/lib/AST/Type.cpp:4142
+4142    bool DecltypeType::isSugared() const { return !E->isInstantiationDependent(); }
+#0  clang::DecltypeType::isSugared (this=0x55555e176240) at /home/user/repo/llvm-project/clang/lib/AST/Type.cpp:4142
+#1  clang::DecltypeType::desugar (this=0x55555e176240) at /home/user/repo/llvm-project/clang/lib/AST/Type.cpp:4145
+#2  0x00005555596f1336 in clang::ASTContext::getTypeInfoImpl (this=this@entry=0x55555e0d59a0, T=T@entry=0x55555e176240) at /home/user/repo/llvm-project/gllvm_build/tools/clang/include/clang/AST/TypeNodes.inc:39
+#3  0x00005555596f4f30 in clang::ASTContext::getTypeInfo (this=this@entry=0x55555e0d59a0, T=T@entry=0x55555e176240) at /home/user/repo/llvm-project/clang/lib/AST/ASTContext.cpp:2056
+#4  0x00005555596f4abb in clang::ASTContext::getTypeInfoInChars (T=0x55555e176240, this=<optimized out>) at /home/user/repo/llvm-project/clang/lib/AST/ASTContext.cpp:1970
+#5  clang::ASTContext::getTypeInfoInChars (this=0x55555e0d59a0, T=...) at /home/user/repo/llvm-project/clang/lib/AST/ASTContext.cpp:1976
+#6  0x00005555596f5f4d in clang::ASTContext::getTypeSizeInChars (this=0x2a0ce64, T=...) at /home/user/repo/llvm-project/clang/lib/AST/ASTContext.cpp:2653
+#7  0x000055555a21c6f7 in clang::ConstantArrayType::getNumAddressingBits (Context=..., ElementType=..., ElementType@entry=..., NumElements=...) at /home/user/repo/llvm-project/clang/lib/AST/Type.cpp:217
+#8  0x000055555a21cc05 in clang::ConstantArrayType::getNumAddressingBits (this=<optimized out>, Context=...) at /home/user/repo/llvm-project/clang/lib/AST/Type.cpp:251
+#9  0x0000555559c1cd27 in CheckArraySize (Info=..., CAT=0x55555e1762c0, CallLoc=...) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:3860
+#10 HandleDestructionImpl (Info=..., CallRange=..., This=..., Value=..., T=...) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:6929
+#11 0x0000555559c1c571 in HandleDestruction (Info=..., Loc=..., LVBase=..., Value=..., T=...) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:7123
+#12 (anonymous namespace)::Cleanup::endLifetime (this=<optimized out>, Info=..., RunDestructors=<optimized out>) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:750
+#13 0x0000555559c26f3b in (anonymous namespace)::ScopeRAII<((anonymous namespace)::ScopeKind)0>::cleanup (Info=..., RunDestructors=true, OldStackSize=0) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:1453
+#14 (anonymous namespace)::ScopeRAII<((anonymous namespace)::ScopeKind)0>::destroy (RunDestructors=true, this=<optimized out>) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:1431
+#15 (anonymous namespace)::ExprEvaluatorBase<(anonymous namespace)::IntExprEvaluator>::VisitStmtExpr (this=0x7fffffff3520, E=<optimized out>) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:8652
+#16 0x0000555559cb2cd9 in (anonymous namespace)::IntExprEvaluator::VisitCastExpr (this=0x7fffffff3520, E=0x55555e1764c0) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:15228
+#17 0x0000555559bd8fa1 in Evaluate (Result=..., Info=..., E=E@entry=0x55555e1764c0) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:16641
+#18 0x0000555559bd40bf in EvaluateAsRValue (Info=..., E=E@entry=0x55555e1764c0, Result=...) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:16763
+#19 0x0000555559bcde64 in EvaluateAsRValue (E=0x55555e1764c0, Result=..., Ctx=..., Info=...) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:16846
+#20 EvaluateAsInt (E=E@entry=0x55555e1764c0, ExprResult=..., Ctx=..., AllowSideEffects=AllowSideEffects@entry=clang::Expr::SE_NoSideEffects, Info=...) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:16857
+#21 0x0000555559bcdbfe in clang::Expr::EvaluateAsInt (this=0x55555e1764c0, Result=..., Ctx=..., AllowSideEffects=clang::Expr::SE_NoSideEffects, InConstantContext=64) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:16916
+#22 0x0000555558733bab in DiagnoseBadShiftValues (S=..., LHS=..., RHS=..., Loc=Loc@entry=..., Opc=Opc@entry=clang::BO_Shl, LHSType=...) at /home/user/repo/llvm-project/clang/lib/Sema/SemaExpr.cpp:11459
+#23 0x0000555558732a0d in clang::Sema::CheckShiftOperands (this=this@entry=0x55555e13c730, LHS=..., RHS=..., Loc=..., Loc@entry=..., Opc=clang::BO_Shl, IsCompAssign=<optimized out>) at /home/user/repo/llvm-project/clang/lib/Sema/SemaExpr.cpp:11753
+#24 0x0000555558742adb in clang::Sema::CreateBuiltinBinOp (this=0x55555e13c730, OpLoc=..., Opc=<optimized out>, LHSExpr=0x55555e176480, RHSExpr=<optimized out>, ForFoldExpression=<optimized out>) at /home/user/repo/llvm-project/clang/lib/Sema/SemaExpr.cpp:15073
+#25 0x00005555586eff52 in clang::Sema::ActOnBinOp (this=0x55555e13c730, S=0x2a0ce64, TokLoc=..., Kind=<optimized out>, LHSExpr=<optimized out>, RHSExpr=0x55555e1764a0) at /home/user/repo/llvm-project/clang/lib/Sema/SemaExpr.cpp:15440
+#26 0x0000555557e92478 in clang::Parser::ParseRHSOfBinaryExpression (this=this@entry=0x55555e1497e0, LHS=LHS@entry=..., MinPrec=MinPrec@entry=clang::prec::Assignment) at /home/user/repo/llvm-project/clang/lib/Parse/ParseExpr.cpp:533
+#27 0x0000555557e910be in clang::Parser::ParseAssignmentExpression (this=this@entry=0x55555e1497e0, CorrectionBehavior=CorrectionBehavior@entry=clang::TypoCorrectionTypeBehavior::AllowNonTypes) at /home/user/repo/llvm-project/clang/lib/Parse/ParseExpr.cpp:92
+#28 0x0000555557e9483e in clang::Parser::ParseExpression (this=0x55555e1497e0, CorrectionBehavior=clang::TypoCorrectionTypeBehavior::AllowNonTypes) at /home/user/repo/llvm-project/clang/lib/Parse/ParseExpr.cpp:48
+#29 clang::Parser::ParsePostfixExpressionSuffix (this=this@entry=0x55555e1497e0, LHS=...) at /home/user/repo/llvm-project/clang/lib/Parse/ParseExpr.cpp:1709
+#30 0x0000555557e98861 in clang::Parser::ParseCastExpression (this=this@entry=0x55555e1497e0, ParseKind=ParseKind@entry=clang::CastParseKind::AnyCastExpr, isAddressOfOperand=<optimized out>, NotCastExpr=@0x7fffffff7500: false, CorrectionBehavior=CorrectionBehavior@entry=clang::TypoCorrectionTypeBehavior::AllowNonTypes, isVectorLiteral=<optimized out>, NotPrimaryExpression=<optimized out>) at /home/user/repo/llvm-project/clang/lib/Parse/ParseExpr.cpp:1622
+#31 0x0000555557e91d32 in clang::Parser::ParseCastExpression (this=0x55555e1497e0, ParseKind=clang::CastParseKind::AnyCastExpr, isAddressOfOperand=false, CorrectionBehavior=clang::TypoCorrectionTypeBehavior::AllowNonTypes, isVectorLiteral=false, NotPrimaryExpression=0x0) at /home/user/repo/llvm-project/clang/lib/Parse/ParseExpr.cpp:567
+#32 clang::Parser::ParseRHSOfBinaryExpression (this=this@entry=0x55555e1497e0, LHS=LHS@entry=..., MinPrec=MinPrec@entry=clang::prec::Assignment) at /home/user/repo/llvm-project/clang/lib/Parse/ParseExpr.cpp:461
+#33 0x0000555557e910be in clang::Parser::ParseAssignmentExpression (this=this@entry=0x55555e1497e0, CorrectionBehavior=CorrectionBehavior@entry=clang::TypoCorrectionTypeBehavior::AllowNonTypes) at /home/user/repo/llvm-project/clang/lib/Parse/ParseExpr.cpp:92
+#34 0x0000555557e91d03 in clang::Parser::ParseRHSOfBinaryExpression (this=this@entry=0x55555e1497e0, LHS=LHS@entry=..., MinPrec=MinPrec@entry=clang::prec::Assignment) at /home/user/repo/llvm-project/clang/lib/Parse/ParseExpr.cpp:459
+#35 0x0000555557e910be in clang::Parser::ParseAssignmentExpression (this=0x55555e1497e0, CorrectionBehavior=<optimized out>) at /home/user/repo/llvm-project/clang/lib/Parse/ParseExpr.cpp:92
+#36 0x0000555557e90e86 in clang::Parser::ParseExpression (this=0x7ffff4f60010, CorrectionBehavior=(unknown: 0x2a0ce64)) at /home/user/repo/llvm-project/clang/lib/Parse/ParseExpr.cpp:48
+#37 0x0000555557f3db87 in clang::Parser::ParseExprStatement (this=0x7ffff4f60010, this@entry=0x55555e1497e0, StmtCtx=StmtCtx@entry=clang::Parser::ParsedStmtContext::SubStmt) at /home/user/repo/llvm-project/clang/lib/Parse/ParseStmt.cpp:521
+#38 0x0000555557f3a141 in clang::Parser::ParseStatementOrDeclarationAfterAttributes (this=this@entry=0x55555e1497e0, Stmts=..., StmtCtx=44093028, StmtCtx@entry=clang::Parser::ParsedStmtContext::SubStmt, TrailingElseLoc=TrailingElseLoc@entry=0x0, CXX11Attrs=..., GNUAttrs=...) at /home/user/repo/llvm-project/clang/lib/Parse/ParseStmt.cpp:249
+#39 0x0000555557f39498 in clang::Parser::ParseStatementOrDeclaration (this=this@entry=0x55555e1497e0, Stmts=..., StmtCtx=StmtCtx@entry=clang::Parser::ParsedStmtContext::SubStmt, TrailingElseLoc=TrailingElseLoc@entry=0x0) at /home/user/repo/llvm-project/clang/lib/Parse/ParseStmt.cpp:75
+#40 0x0000555557f410c0 in clang::Parser::ParseStatement (this=0x55555e1497e0, TrailingElseLoc=0x0, StmtCtx=clang::Parser::ParsedStmtContext::SubStmt) at /home/user/repo/llvm-project/clang/lib/Parse/ParseStmt.cpp:47
+#41 clang::Parser::ParseWhileStatement (this=this@entry=0x55555e1497e0, TrailingElseLoc=TrailingElseLoc@entry=0x0) at /home/user/repo/llvm-project/clang/lib/Parse/ParseStmt.cpp:1767
+#42 0x0000555557f3a541 in clang::Parser::ParseStatementOrDeclarationAfterAttributes (this=this@entry=0x55555e1497e0, Stmts=..., StmtCtx=StmtCtx@entry=clang::Parser::ParsedStmtContext::Compound, TrailingElseLoc=0x2a0ce64, TrailingElseLoc@entry=0x0, CXX11Attrs=..., GNUAttrs=...) at /home/user/repo/llvm-project/clang/lib/Parse/ParseStmt.cpp:284
+#43 0x0000555557f39498 in clang::Parser::ParseStatementOrDeclaration (this=this@entry=0x55555e1497e0, Stmts=..., StmtCtx=StmtCtx@entry=clang::Parser::ParsedStmtContext::Compound, TrailingElseLoc=TrailingElseLoc@entry=0x0) at /home/user/repo/llvm-project/clang/lib/Parse/ParseStmt.cpp:75
+#44 0x0000555557f48a2b in clang::Parser::ParseCompoundStatementBody (this=this@entry=0x55555e1497e0, isStmtExpr=44) at /home/user/repo/llvm-project/clang/lib/Parse/ParseStmt.cpp:1161
+#45 0x0000555557f49dfd in clang::Parser::ParseFunctionStatementBody (this=0x55555e1497e0, Decl=0x55555e1500d0, BodyScope=...) at /home/user/repo/llvm-project/clang/lib/Parse/ParseStmt.cpp:2393
+#46 0x0000555557e0048d in clang::Parser::ParseFunctionDefinition (this=0x55555e1497e0, D=..., TemplateInfo=..., LateParsedAttrs=0x7fffffff86e8) at /home/user/repo/llvm-project/clang/lib/Parse/Parser.cpp:1449
+#47 0x0000555557e3d1da in clang::Parser::ParseDeclGroup (this=0x55555e1497e0, DS=..., Context=clang::DeclaratorContext::File, Attrs=..., TemplateInfo=..., DeclEnd=0x0, FRI=0x0) at /home/user/repo/llvm-project/clang/lib/Parse/ParseDecl.cpp:2238
+#48 0x0000555557dfe72d in clang::Parser::ParseDeclOrFunctionDefInternal (this=this@entry=0x55555e1497e0, Attrs=..., DeclSpecAttrs=..., DS=..., AS=AS@entry=clang::AS_none) at /home/user/repo/llvm-project/clang/lib/Parse/Parser.cpp:1187
+#49 0x0000555557dfd9ee in clang::Parser::ParseDeclarationOrFunctionDefinition (this=this@entry=0x55555e1497e0, Attrs=..., DeclSpecAttrs=..., DS=DS@entry=0x55555e1497e0, AS=AS@entry=clang::AS_none) at /home/user/repo/llvm-project/clang/lib/Parse/Parser.cpp:1209
+#50 0x0000555557dfbfef in clang::Parser::ParseExternalDeclaration (this=this@entry=0x55555e1497e0, Attrs=..., DeclSpecAttrs=..., DS=DS@entry=0x0) at /home/user/repo/llvm-project/clang/lib/Parse/Parser.cpp:1032
+#51 0x0000555557df9357 in clang::Parser::ParseTopLevelDecl (this=this@entry=0x55555e1497e0, Result=..., ImportState=@0x7fffffff9df4: clang::Sema::ModuleImportState::FirstDecl) at /home/user/repo/llvm-project/clang/lib/Parse/Parser.cpp:745
+#52 0x0000555557df896e in clang::Parser::ParseFirstTopLevelDecl (this=0x55555e1497e0, Result=..., ImportState=@0x7fffffff9df4: clang::Sema::ModuleImportState::FirstDecl) at /home/user/repo/llvm-project/clang/lib/Parse/Parser.cpp:601
+#53 0x0000555557df184b in clang::ParseAST (S=..., PrintStats=false, SkipFunctionBodies=<optimized out>) at /home/user/repo/llvm-project/clang/lib/Parse/ParseAST.cpp:169
+#54 0x0000555557c8064c in clang::FrontendAction::Execute (this=0x2a0ce64) at /home/user/repo/llvm-project/clang/lib/Frontend/FrontendAction.cpp:1221
+#55 0x0000555557b51601 in clang::CompilerInstance::ExecuteAction (this=0x7fffffff9fb0, Act=...) at /home/user/repo/llvm-project/clang/lib/Frontend/CompilerInstance.cpp:1055
+#56 0x0000555557b085d7 in clang::tooling::FrontendActionFactory::runInvocation (this=0x55555e0a4e80, Invocation=..., Files=0x55555e091790, PCHContainerOps=..., DiagConsumer=0x7fffffffa190) at /home/user/repo/llvm-project/clang/lib/Tooling/Tooling.cpp:463
+#57 0x00005555558d1a8e in clang_fuzzer::HandleCXX (S="void fn_4 ( double * a , double * b , double * c ) { int i = 0 ; while ( i < 10 ) a [ sizeof ( 0x11 ) / 0xbf ] = i ++ * c [ ( { struct tree_el { int val ; int insert ( const MyType Rcon [ thousands [ "..., FileName=<optimized out>, ExtraArgs=std::vector of length 1, capacity 1 = {...}) at /home/user/repo/llvm-project/clang/tools/clang-fuzzer/handle-cxx/handle_cxx.cpp:49
+#58 0x00005555558d1434 in LLVMFuzzerTestOneInput (data=0x7ffff4e5f010 "void fn_4 ( double * a , double * b , double * c ) { int i = 0 ; while ( i < 10 ) a [ sizeof ( 0x11 ) / 0xbf ] = i ++ * c [ ( { struct tree_el { int val ; int insert ( const MyType Rcon [ thousands [ "..., size=<optimized out>) at /home/user/repo/llvm-project/clang/tools/clang-fuzzer/ClangFuzzer.cpp:23
+#59 0x000055555c55452e in ExecuteFilesOnyByOne (argc=2, argv=0x7fffffffe198, callback=callback@entry=0x5555558d12f0 <LLVMFuzzerTestOneInput(uint8_t*, size_t)>) at aflpp_driver.c:256
+#60 0x000055555c55431e in LLVMFuzzerRunDriver (argcp=argcp@entry=0x7fffffffe064, argvp=argvp@entry=0x7fffffffe068, callback=0x5555558d12f0 <LLVMFuzzerTestOneInput(uint8_t*, size_t)>) at aflpp_driver.c:377
+#61 0x000055555c553e5e in main (argc=argc@entry=2, argv=argv@entry=0x7fffffffe198) at aflpp_driver.c:312
+#62 0x00007ffff7a64d90 in __libc_start_call_main (main=main@entry=0x55555c553da0 <main>, argc=argc@entry=2, argv=argv@entry=0x7fffffffe198) at ../sysdeps/nptl/libc_start_call_main.h:58
+#63 0x00007ffff7a64e40 in __libc_start_main_impl (main=0x55555c553da0 <main>, argc=2, argv=0x7fffffffe198, init=<optimized out>, fini=<optimized out>, rtld_fini=<optimized out>, stack_end=0x7fffffffe188) at ../csu/libc-start.c:392
+#64 0x00005555558d1215 in _start ()

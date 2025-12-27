@@ -1,0 +1,68 @@
+PoC：
+void fn_40_b ( const char * ( * a4 ( int * __cdecl f2 ( int * state_t [ 4 ] [ 4 ] , char * argv [ ] ) , ... ) ) [ 1 / ( ( 1 + ( __FILE__ [ 10 ] ) >> ( 0x52 >> ( ( ( ( ( __builtin_FILE ( ) [ 0 ] ) & ( ( 0x52 >> 0x5b ) & ( ( __builtin_expect ( - ( __builtin_expect ( - ( ( sizeof ( * "%f%f%f" ) ) ) , 0 ) ) - ( ( ( ( ( 1 + - ( sizeof ( 0x1c ) ) ) + ( 0.0 ) ) * ( ( ( ( sizeof ( bool [ 1 / ( ( ( sizeof ( __builtin_printf ( "Setup" , 0 , 0 ) / ( 1 + ( ( bool ( 1 ) ) ) ) ) % 2 ) ) ) ] ) ) * 0x1b ) ) * 0xc6 ) ) * 4 ) * 4 ) , 0 ) ) ) ) / ( 1 + ( 1 / ( ( 0 ) ) ) ) ) * 4 ) * 0x1b ) ) ) ) ) ] , const char ( * f2 ) ( double * a , double * b , void * c ) , int thousands_len ) { struct tree_el { struct test44_d { struct tree_el { struct list_el { int state_t [ 0x11 ] [ 4 ] ; int ( n7 ) [ 4 ] [ 10000 ] ; } val ; struct fn_12 * right , * left ; } Rcon [ ! ( 0x85 >= ( 0xaa ) ) ] ; int se , foo [ 4 ] ; } \u00b5_var ; int fn_9 ; } cnt ; ! ( * "%f%f%f" ) ; }
+
+Reproduction:
+gdb -q --batch \
+    -x gdb_bt.cmd \
+    --args /home/user/repo/llvm-project/gllvm_build/bin/clang-fuzzer poc
+
+
+
+Crashing thread backtrace:
+Running LLVMFuzzerInitialize ...
+continue...
+
+Program received signal SIGSEGV, Segmentation fault.
+__memmove_avx_unaligned () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:222
+222     ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S: No such file or directory.
+#0  __memmove_avx_unaligned () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:222
+#1  0x000055555a0ab7b9 in llvm::APInt::APInt (this=0x7fffffff7e50, that=...) at /home/user/repo/llvm-project/llvm/include/llvm/ADT/APInt.h:160
+#2  llvm::APSInt::APSInt (this=0x7fffffff7e50) at /home/user/repo/llvm-project/llvm/include/llvm/ADT/APSInt.h:23
+#3  clang::Expr::EvaluateKnownConstInt (this=0x55555e37a9b0, Ctx=..., Diag=<optimized out>) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:16278
+#4  0x000055555a40a7db in (anonymous namespace)::CXXNameMangler::mangleExpression (this=this@entry=0x7fffffff9d00, E=0x55555e37a9b0, Arity=Arity@entry=4294967295, AsTemplateArg=false) at /home/user/repo/llvm-project/clang/lib/AST/ItaniumMangle.cpp:5134
+#5  0x000055555a40967f in (anonymous namespace)::CXXNameMangler::mangleExpression (this=this@entry=0x7fffffff9d00, E=0x55555e37aa28, Arity=Arity@entry=4294967295, AsTemplateArg=false) at /home/user/repo/llvm-project/clang/lib/AST/ItaniumMangle.cpp:5307
+#6  0x000055555a40967f in (anonymous namespace)::CXXNameMangler::mangleExpression (this=0x7fffffff9d00, E=0x55555e37aac0, Arity=4294967295, AsTemplateArg=false) at /home/user/repo/llvm-project/clang/lib/AST/ItaniumMangle.cpp:5307
+#7  0x000055555a409693 in (anonymous namespace)::CXXNameMangler::mangleExpression (this=this@entry=0x7fffffff9d00, E=0x55555e37ab18, Arity=Arity@entry=4294967295, AsTemplateArg=false) at /home/user/repo/llvm-project/clang/lib/AST/ItaniumMangle.cpp:5307
+#8  0x000055555a40967f in (anonymous namespace)::CXXNameMangler::mangleExpression (this=this@entry=0x7fffffff9d00, E=0x55555e37ab90, Arity=Arity@entry=4294967295, AsTemplateArg=false) at /home/user/repo/llvm-project/clang/lib/AST/ItaniumMangle.cpp:5307
+#9  0x000055555a40967f in (anonymous namespace)::CXXNameMangler::mangleExpression (this=0x7fffffff9d00, E=0x55555e37ac08, Arity=4294967295, AsTemplateArg=false) at /home/user/repo/llvm-project/clang/lib/AST/ItaniumMangle.cpp:5307
+#10 0x000055555a409693 in (anonymous namespace)::CXXNameMangler::mangleExpression (this=this@entry=0x7fffffff9d00, E=0x55555e37ac60, Arity=Arity@entry=4294967295, AsTemplateArg=false) at /home/user/repo/llvm-project/clang/lib/AST/ItaniumMangle.cpp:5307
+#11 0x000055555a408a14 in (anonymous namespace)::CXXNameMangler::mangleExpression (this=0x7fffffff9d00, E=0x55555e37acb8, Arity=4294967295, AsTemplateArg=false) at /home/user/repo/llvm-project/clang/lib/AST/ItaniumMangle.cpp:4916
+#12 0x000055555a409693 in (anonymous namespace)::CXXNameMangler::mangleExpression (this=this@entry=0x7fffffff9d00, E=0x55555e37ad70, Arity=Arity@entry=4294967295, AsTemplateArg=false) at /home/user/repo/llvm-project/clang/lib/AST/ItaniumMangle.cpp:5307
+#13 0x000055555a40967f in (anonymous namespace)::CXXNameMangler::mangleExpression (this=0x7fffffff9d00, E=0x55555e37bf18, Arity=4294967295, AsTemplateArg=false) at /home/user/repo/llvm-project/clang/lib/AST/ItaniumMangle.cpp:5307
+#14 0x000055555a409693 in (anonymous namespace)::CXXNameMangler::mangleExpression (this=this@entry=0x7fffffff9d00, E=0x55555e37bf68, Arity=Arity@entry=4294967295, AsTemplateArg=false) at /home/user/repo/llvm-project/clang/lib/AST/ItaniumMangle.cpp:5307
+#15 0x000055555a40967f in (anonymous namespace)::CXXNameMangler::mangleExpression (this=this@entry=0x7fffffff9d00, E=0x55555e37bfe0, Arity=Arity@entry=4294967295, AsTemplateArg=false) at /home/user/repo/llvm-project/clang/lib/AST/ItaniumMangle.cpp:5307
+#16 0x000055555a40967f in (anonymous namespace)::CXXNameMangler::mangleExpression (this=0x7fffffff9d00, E=0x55555e37c058, Arity=4294967295, AsTemplateArg=false) at /home/user/repo/llvm-project/clang/lib/AST/ItaniumMangle.cpp:5307
+#17 0x000055555a409693 in (anonymous namespace)::CXXNameMangler::mangleExpression (this=0x7fffffff9d00, E=0x55555e37c0e0, Arity=<optimized out>, AsTemplateArg=false) at /home/user/repo/llvm-project/clang/lib/AST/ItaniumMangle.cpp:5307
+#18 0x000055555a409693 in (anonymous namespace)::CXXNameMangler::mangleExpression (this=0x7fffffff9d00, E=0x55555e37c120, Arity=<optimized out>, AsTemplateArg=false) at /home/user/repo/llvm-project/clang/lib/AST/ItaniumMangle.cpp:5307
+#19 0x000055555a409693 in (anonymous namespace)::CXXNameMangler::mangleExpression (this=this@entry=0x7fffffff9d00, E=0x55555e37c180, Arity=Arity@entry=4294967295, AsTemplateArg=false) at /home/user/repo/llvm-project/clang/lib/AST/ItaniumMangle.cpp:5307
+#20 0x000055555a3f7990 in (anonymous namespace)::CXXNameMangler::mangleType (this=this@entry=0x7fffffff9d00, T=T@entry=0x55555e37c1c0) at /home/user/repo/llvm-project/clang/lib/AST/ItaniumMangle.cpp:3679
+#21 0x000055555a3f5d08 in (anonymous namespace)::CXXNameMangler::mangleType (this=0x7fffffff9d00, T=...) at /home/user/repo/llvm-project/gllvm_build/tools/clang/include/clang/AST/TypeNodes.inc:29
+#22 0x000055555a3f607e in (anonymous namespace)::CXXNameMangler::mangleType (this=this@entry=0x7fffffff9d00, T=...) at /home/user/repo/llvm-project/gllvm_build/tools/clang/include/clang/AST/TypeNodes.inc:67
+#23 0x000055555a41c4f3 in (anonymous namespace)::CXXNameMangler::mangleBareFunctionType (this=this@entry=0x7fffffff9d00, Proto=Proto@entry=0x55555e37c290, MangleReturnType=<optimized out>, FD=FD@entry=0x0) at /home/user/repo/llvm-project/clang/lib/AST/ItaniumMangle.cpp:3604
+#24 0x000055555a401a3b in (anonymous namespace)::CXXNameMangler::mangleType (this=this@entry=0x7fffffff9d00, T=T@entry=0x55555e37c290) at /home/user/repo/llvm-project/clang/lib/AST/ItaniumMangle.cpp:3558
+#25 0x000055555a3f5f1f in (anonymous namespace)::CXXNameMangler::mangleType (this=0x7fffffff9d00, T=...) at /home/user/repo/llvm-project/gllvm_build/tools/clang/include/clang/AST/TypeNodes.inc:52
+#26 0x000055555a3f607e in (anonymous namespace)::CXXNameMangler::mangleType (this=this@entry=0x7fffffff9d00, T=...) at /home/user/repo/llvm-project/gllvm_build/tools/clang/include/clang/AST/TypeNodes.inc:67
+#27 0x000055555a41caae in (anonymous namespace)::CXXNameMangler::mangleBareFunctionType (this=0x7fffffff9d00, Proto=0x55555e37c870, MangleReturnType=<optimized out>, FD=0x55555e37c8f0) at /home/user/repo/llvm-project/clang/lib/AST/ItaniumMangle.cpp:3622
+#28 0x000055555a3f2635 in (anonymous namespace)::CXXNameMangler::mangleFunctionEncoding (this=0x7fffffff9d00, GD=...) at /home/user/repo/llvm-project/clang/lib/AST/ItaniumMangle.cpp:855
+#29 0x000055555a3ed5ec in (anonymous namespace)::ItaniumMangleContextImpl::mangleCXXName (this=0x55555e3115b0, GD=..., Out=...) at /home/user/repo/llvm-project/clang/lib/AST/ItaniumMangle.cpp:7039
+#30 0x0000555555f6e8b3 in getMangledNameImpl[abi:cxx11](clang::CodeGen::CodeGenModule&, clang::GlobalDecl, clang::NamedDecl const*, bool) (CGM=..., GD=..., ND=ND@entry=0x55555e37c8f0, OmitMultiVersionMangling=212) at /home/user/repo/llvm-project/clang/lib/CodeGen/CodeGenModule.cpp:1845
+#31 0x0000555555f607eb in clang::CodeGen::CodeGenModule::getMangledName (this=this@entry=0x55555e3105d0, GD=...) at /home/user/repo/llvm-project/clang/lib/CodeGen/CodeGenModule.cpp:1998
+#32 0x0000555555f901cc in clang::CodeGen::CodeGenModule::GetAddrOfFunction (this=this@entry=0x55555e3105d0, GD=..., Ty=0x55555e312fd8, ForVTable=<optimized out>, DontDefer=true, IsForDefinition=<optimized out>) at /home/user/repo/llvm-project/clang/lib/CodeGen/CodeGenModule.cpp:4782
+#33 0x0000555555f8c658 in clang::CodeGen::CodeGenModule::EmitGlobalFunctionDefinition (this=0x7fffe8f53010, this@entry=0x55555e3105d0, GD=..., GV=GV@entry=0x0) at /home/user/repo/llvm-project/clang/lib/CodeGen/CodeGenModule.cpp:5971
+#34 0x0000555555f7e68d in clang::CodeGen::CodeGenModule::EmitGlobalDefinition (this=0x7fffe8f53010, this@entry=0x55555e3105d0, GD=..., GV=0x7ffff7b58a97 <__GI___mmap64+23>, GV@entry=0x0) at /home/user/repo/llvm-project/clang/lib/CodeGen/CodeGenModule.cpp:4151
+#35 0x0000555555f85673 in clang::CodeGen::CodeGenModule::EmitGlobal (this=this@entry=0x55555e3105d0, GD=...) at /home/user/repo/llvm-project/clang/lib/CodeGen/CodeGenModule.cpp:3862
+#36 0x0000555555f7c976 in clang::CodeGen::CodeGenModule::EmitTopLevelDecl (this=0x55555e3105d0, D=0x55555e37c8f0) at /home/user/repo/llvm-project/clang/lib/CodeGen/CodeGenModule.cpp:6878
+#37 0x0000555555b0db41 in (anonymous namespace)::CodeGeneratorImpl::HandleTopLevelDecl (this=0x55555e310410, DG=...) at /home/user/repo/llvm-project/clang/lib/CodeGen/ModuleBuilder.cpp:190
+#38 0x0000555555ad087d in clang::BackendConsumer::HandleTopLevelDecl (this=0x55555e2c9e00, D=...) at /home/user/repo/llvm-project/clang/lib/CodeGen/CodeGenAction.cpp:199
+#39 0x0000555557cdffda in clang::ParseAST (S=..., PrintStats=false, SkipFunctionBodies=<optimized out>) at /home/user/repo/llvm-project/clang/lib/Parse/ParseAST.cpp:175
+#40 0x0000555557b850e6 in clang::FrontendAction::Execute (this=0x55555e2c9a80) at /home/user/repo/llvm-project/clang/lib/Frontend/FrontendAction.cpp:1078
+#41 0x0000555557a4ae01 in clang::CompilerInstance::ExecuteAction (this=0x7fffffffd8f8, Act=...) at /home/user/repo/llvm-project/clang/lib/Frontend/CompilerInstance.cpp:1061
+#42 0x0000555557a02502 in clang::tooling::FrontendActionFactory::runInvocation (this=0x55555e2c1ef0, Invocation=..., Files=0x55555e2c6910, PCHContainerOps=..., DiagConsumer=0x7fffffffdac0) at /home/user/repo/llvm-project/clang/lib/Tooling/Tooling.cpp:465
+#43 0x0000555555acd136 in clang_fuzzer::HandleCXX (S="void fn_40_b ( const char * ( * a4 ( int * __cdecl f2 ( int * state_t [ 4 ] [ 4 ] , char * argv [ ] ) , ... ) ) [ 1 / ( ( 1 + ( __FILE__ [ 10 ] ) >> ( 0x52 >> ( ( ( ( ( __builtin_FILE ( ) [ 0 ] ) & ( "..., FileName=<optimized out>, ExtraArgs=std::vector of length 1, capacity 1 = {...}) at /home/user/repo/llvm-project/clang/tools/clang-fuzzer/handle-cxx/handle_cxx.cpp:49
+#44 0x0000555555accad4 in LLVMFuzzerTestOneInput (data=0x7ffff4be4010 "void fn_40_b ( const char * ( * a4 ( int * __cdecl f2 ( int * state_t [ 4 ] [ 4 ] , char * argv [ ] ) , ... ) ) [ 1 / ( ( 1 + ( __FILE__ [ 10 ] ) >> ( 0x52 >> ( ( ( ( ( __builtin_FILE ( ) [ 0 ] ) & ( "..., size=<optimized out>) at /home/user/repo/llvm-project/clang/tools/clang-fuzzer/ClangFuzzer.cpp:23
+#45 0x000055555c6f96ee in ExecuteFilesOnyByOne (argc=2, argv=0x7fffffffe348, callback=callback@entry=0x555555acc990 <LLVMFuzzerTestOneInput(uint8_t*, size_t)>) at aflpp_driver.c:256
+#46 0x000055555c6f94de in LLVMFuzzerRunDriver (argcp=argcp@entry=0x7fffffffe214, argvp=argvp@entry=0x7fffffffe218, callback=0x555555acc990 <LLVMFuzzerTestOneInput(uint8_t*, size_t)>) at aflpp_driver.c:377
+#47 0x000055555c6f901e in main (argc=argc@entry=2, argv=argv@entry=0x7fffffffe348) at aflpp_driver.c:312
+#48 0x00007ffff7a63d90 in __libc_start_call_main (main=main@entry=0x55555c6f8f60 <main>, argc=argc@entry=2, argv=argv@entry=0x7fffffffe348) at ../sysdeps/nptl/libc_start_call_main.h:58
+#49 0x00007ffff7a63e40 in __libc_start_main_impl (main=0x55555c6f8f60 <main>, argc=2, argv=0x7fffffffe348, init=<optimized out>, fini=<optimized out>, rtld_fini=<optimized out>, stack_end=0x7fffffffe338) at ../csu/libc-start.c:392
+#50 0x0000555555acc8b5 in _start ()
