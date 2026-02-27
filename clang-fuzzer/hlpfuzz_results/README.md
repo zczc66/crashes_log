@@ -3,7 +3,9 @@
 The information of crashes using hlpfuzz
 
 
-Clang : 21.1.8
+
+Clang : 19.1.0
+
 
 
 Time : 21h30min
