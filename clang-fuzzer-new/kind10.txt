@@ -1,0 +1,38 @@
+PoC：
+int main ( ) { union U16 { unsigned int i ; unsigned short s [ wchar_t ( ( wchar_t ( ( ( wchar_t ( cnt < cnt , wchar_t ( ( ( { { struct list_el { int val ; int * ( * * state ) [ ( { for ( i ^= 1 ; i <= LAST ; 0x1111 ) { struct list_el { int AES_ECB_encrypt ( int argc , char * fn_24 ( void ) [ ] ) ( void ) ( ) ; int * ( * state ) [ j ] [ i ] ; } j = 0B1010 , Rcon [ 11 ] = { 0x8d , 0x01 , 0x02 , j , 0x08 , 0x10 , create_float_dialog_entry ( cnt < cnt , & x ) , 0x40 , 0x80 , 0x1b , 0x36 } ; } __attribute__ ( ( c16_1 ( printf ) ) ) c * f = __FILE__ ; } ) ] [ i ] ; } half_bits = 0x3C00 ; __fp16 h ; __builtin_memcpy ( & h , & half_bits , 0xAAAAAAAAAAAAAAAAULL ) ; const __fp16 h2 = - ( wchar_t ( sum ) < ( 10 ) ) ; volatile float f = 3.0f ; volatile double x0 , xn , h , y [ 20 ] , so , se , sum ( ) , x [ 20 ] ; return ( int ) h2 + ( int ) f + ( int ) d ; } * ( L"\u00b5" ) ; } ) ) ) ) ) ) ) ) ) ] ; } u16 ; wchar_t ( 0x81 ) ; }
+
+
+Reproduction:
+gdb -q --batch \
+    -x gdb_bt.cmd \
+    --args /home/user/repo/llvm-project/gllvm_build/bin/clang-fuzzer poc
+
+
+
+Crashing thread backtrace:
+Program received signal SIGSEGV, Segmentation fault.
+clang::Sema::getFunctionLevelDeclContext (this=0x55555e13c770, AllowLambda=false) at /home/user/repo/llvm-project/clang/lib/Sema/Sema.cpp:1633
+1633	    } else if (!AllowLambda && isa<CXXMethodDecl>(DC) &&
+#0  clang::Sema::getFunctionLevelDeclContext (this=0x55555e13c770, AllowLambda=false) at /home/user/repo/llvm-project/clang/lib/Sema/Sema.cpp:1633
+#1  0x00005555582eb26d in clang::Sema::getCurFunctionDecl (this=0x55555e13c770, AllowLambda=false) at /home/user/repo/llvm-project/clang/lib/Sema/Sema.cpp:1647
+#2  0x000055555835046f in clang::SemaBase::Diag (this=0x55555e13c778, Loc=..., DiagID=7524, DeferHint=false) at /home/user/repo/llvm-project/clang/lib/Sema/SemaBase.cpp:75
+#3  0x0000555558350565 in clang::SemaBase::Diag (this=0x0, Loc=..., PD=..., DeferHint=false) at /home/user/repo/llvm-project/clang/lib/Sema/SemaBase.cpp:88
+#4  0x00005555582fac64 in clang::Sema::PopFunctionScopeInfo (this=<optimized out>, WP=0x0, D=0x55555e14ff38, BlockType=...) at /home/user/repo/llvm-project/clang/lib/Sema/Sema.cpp:2460
+#5  0x0000555558575d98 in clang::Sema::ActOnFinishFunctionBody (this=0x55555e13c770, dcl=<optimized out>, Body=<optimized out>, IsInstantiation=56) at /home/user/repo/llvm-project/clang/lib/Sema/SemaDecl.cpp:16687
+#6  0x0000555557f49eca in clang::Parser::ParseFunctionStatementBody (this=0x55555e149820, Decl=0x55555e14ff38, BodyScope=...) at /home/user/repo/llvm-project/clang/lib/Parse/ParseStmt.cpp:2402
+#7  0x0000555557e0048d in clang::Parser::ParseFunctionDefinition (this=0x55555e149820, D=..., TemplateInfo=..., LateParsedAttrs=0x7fffffff8a58) at /home/user/repo/llvm-project/clang/lib/Parse/Parser.cpp:1449
+#8  0x0000555557e3d1da in clang::Parser::ParseDeclGroup (this=0x55555e149820, DS=..., Context=clang::DeclaratorContext::File, Attrs=..., TemplateInfo=..., DeclEnd=0x0, FRI=0x0) at /home/user/repo/llvm-project/clang/lib/Parse/ParseDecl.cpp:2238
+#9  0x0000555557dfe72d in clang::Parser::ParseDeclOrFunctionDefInternal (this=this@entry=0x55555e149820, Attrs=..., DeclSpecAttrs=..., DS=..., AS=AS@entry=clang::AS_none) at /home/user/repo/llvm-project/clang/lib/Parse/Parser.cpp:1187
+#10 0x0000555557dfd9ee in clang::Parser::ParseDeclarationOrFunctionDefinition (this=this@entry=0x55555e149820, Attrs=..., DeclSpecAttrs=..., DS=DS@entry=0x55555e149820, AS=AS@entry=clang::AS_none) at /home/user/repo/llvm-project/clang/lib/Parse/Parser.cpp:1209
+#11 0x0000555557dfbfef in clang::Parser::ParseExternalDeclaration (this=this@entry=0x55555e149820, Attrs=..., DeclSpecAttrs=..., DS=0x7ffff4cf2010, DS@entry=0x0) at /home/user/repo/llvm-project/clang/lib/Parse/Parser.cpp:1032
+#12 0x0000555557df9357 in clang::Parser::ParseTopLevelDecl (this=this@entry=0x55555e149820, Result=..., ImportState=@0x7fffffffa164: clang::Sema::ModuleImportState::FirstDecl) at /home/user/repo/llvm-project/clang/lib/Parse/Parser.cpp:745
+#13 0x0000555557df896e in clang::Parser::ParseFirstTopLevelDecl (this=0x55555e149820, Result=..., ImportState=@0x7fffffffa164: clang::Sema::ModuleImportState::FirstDecl) at /home/user/repo/llvm-project/clang/lib/Parse/Parser.cpp:601
+#14 0x0000555557df184b in clang::ParseAST (S=..., PrintStats=false, SkipFunctionBodies=<optimized out>) at /home/user/repo/llvm-project/clang/lib/Parse/ParseAST.cpp:169
+#15 0x0000555557c8064c in clang::FrontendAction::Execute (this=0x0) at /home/user/repo/llvm-project/clang/lib/Frontend/FrontendAction.cpp:1221
+#16 0x0000555557b51601 in clang::CompilerInstance::ExecuteAction (this=0x7fffffffa320, Act=...) at /home/user/repo/llvm-project/clang/lib/Frontend/CompilerInstance.cpp:1055
+#17 0x0000555557b085d7 in clang::tooling::FrontendActionFactory::runInvocation (this=0x55555e0a4e80, Invocation=..., Files=0x55555e0917d0, PCHContainerOps=..., DiagConsumer=0x7fffffffa500) at /home/user/repo/llvm-project/clang/lib/Tooling/Tooling.cpp:463
+#18 0x00005555558d1a8e in clang_fuzzer::HandleCXX (S="int main ( ) { union U16 { unsigned int i ; unsigned short s [ wchar_t ( ( wchar_t ( ( ( wchar_t ( cnt < cnt , wchar_t ( ( ( { { struct list_el { int val ; int * ( * * state ) [ ( { for ( i ^= 1 ; i <"..., FileName=<optimized out>, ExtraArgs=std::vector of length 1, capacity 1 = {...}) at /home/user/repo/llvm-project/clang/tools/clang-fuzzer/handle-cxx/handle_cxx.cpp:49
+#19 0x00005555558d1434 in LLVMFuzzerTestOneInput (data=0x7ffff4bf1010 "int main ( ) { union U16 { unsigned int i ; unsigned short s [ wchar_t ( ( wchar_t ( ( ( wchar_t ( cnt < cnt , wchar_t ( ( ( { { struct list_el { int val ; int * ( * * state ) [ ( { for ( i ^= 1 ; i <"..., size=<optimized out>) at /home/user/repo/llvm-project/clang/tools/clang-fuzzer/ClangFuzzer.cpp:23
+#20 0x000055555c55452e in ExecuteFilesOnyByOne (argc=2, argv=0x7fffffffe508, callback=callback@entry=0x5555558d12f0 <LLVMFuzzerTestOneInput(uint8_t*, size_t)>) at aflpp_driver.c:256
+#21 0x000055555c55431e in LLVMFuzzerRunDriver (argcp=argcp@entry=0x7fffffffe3d4, argvp=argvp@entry=0x7fffffffe3d8, callback=0x5555558d12f0 <LLVMFuzzerTestOneInput(uint8_t*, size_t)>) at aflpp_driver.c:377
+#22 0x000055555c553e5e in main (argc=2, argv=0x7fffffffe508) at aflpp_driver.c:312

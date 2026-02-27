@@ -1,0 +1,66 @@
+PoC：
+constexpr unsigned f ( ) { return 0U - ( ( ( ( - ( ( ( ( 0xce + 0x123456789ABCDEF0 ) ) >> 7 ) & 1 ) ) / ( 0x3c << 1 + 1 / ( ! ( ( - ( 0xce + - f ( ) ? 1 : ( 0x26 + 0.0 ) ) ) ) ) ) ? 1 / - ( 0x30 > ( ( ( ( ( 1 / ( 1 + - ( ( 1 / ( ( 1 / ( 1 + 0.0 ) ) ) ) + 0.0 ) ) ) * 0x1b ) ) ) < ( 10 ) ) ) : ( ( U'\u00b5' == 1 / ( '\x1b' * ( 0x30 > ( 1 / ( 1 + ( ( 1 / - ( - ( ( 0xce + ( U'\u2183' ) ) ) ) ? 1 : - 1 ) + 0.0 ) ) ) ) ) ? 1 / - ( - ( ( 0xce + ( U'\u2183' ) ) ) ) : 1 / ( ! ( 0x30 > ( ( U'\u00b5' == 1 / ( 1 + 0x17 ) ? 1 : - 0x96 ) < ( ( U'\u00b5' == 1 / ( 1 + 0x17 ) ? 1 : - 1 ) + 0.0 ) ) ) ) ) < ( 10 ) ) ) + 0x123456789ABCDEF0 ) ) ; } int main ( ) { return f ( ) ; }
+
+
+Reproduction:
+gdb -q --batch \
+    -x gdb_bt.cmd \
+    --args /home/user/repo/llvm-project/gllvm_build/bin/clang-fuzzer poc
+
+
+
+Crashing thread backtrace:（Not complete because too long）
+Program received signal SIGSEGV, Segmentation fault.
+0x0000555559c31f54 in (anonymous namespace)::IntExprEvaluator::VisitBinaryOperator (this=0x7fffff7ff190, E=0x55555e150098) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:14741
+14741	bool IntExprEvaluator::VisitBinaryOperator(const BinaryOperator *E) {
+#0  0x0000555559c31f54 in (anonymous namespace)::IntExprEvaluator::VisitBinaryOperator (this=0x7fffff7ff190, E=0x55555e150098) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:14741
+#1  0x0000555559c24851 in (anonymous namespace)::IntExprEvaluator::VisitUnaryOperator (this=0x7fffff7ff190, E=0x55555e1500d8) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:15088
+#2  0x0000555559bd8fa1 in Evaluate (Result=..., Info=..., E=E@entry=0x55555e1500d8) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:16641
+#3  0x0000555559c32406 in (anonymous namespace)::DataRecursiveIntBinOpEvaluator::EvaluateExpr (this=0x7fffff7ff430, E=0x55555e1500d8, Result=...) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:14118
+#4  (anonymous namespace)::DataRecursiveIntBinOpEvaluator::process (this=0x7fffff7ff430, Result=...) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:14300
+#5  (anonymous namespace)::DataRecursiveIntBinOpEvaluator::Traverse (this=0x7fffff7ff430, E=<optimized out>) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:14084
+#6  (anonymous namespace)::IntExprEvaluator::VisitBinaryOperator (this=<optimized out>, E=<optimized out>) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:14751
+#7  0x0000555559bd8fa1 in Evaluate (Result=..., Info=..., E=E@entry=0x55555e150550) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:16641
+#8  0x0000555559cb2f8a in EvaluateAsBooleanCondition (E=0x55555e150550, Result=@0x7fffff7ffc90: false, Info=...) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:2769
+#9  (anonymous namespace)::IntExprEvaluator::VisitCastExpr (this=0x7fffff7ffdf0, E=0x55555e16c820) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:15198
+#10 0x0000555559bd8fa1 in Evaluate (Result=..., Info=..., E=0x55555e16c820) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:16641
+#11 0x0000555559c387dc in EvaluateAsBooleanCondition (E=0x9e, Result=@0x7fffff7ffed7: false, Info=...) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:2769
+#12 (anonymous namespace)::ExprEvaluatorBase<(anonymous namespace)::IntExprEvaluator>::HandleConditionalOperator<clang::ConditionalOperator> (this=0x7fffff8001b0, E=0x2c5951f) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:8031
+#13 (anonymous namespace)::ExprEvaluatorBase<(anonymous namespace)::IntExprEvaluator>::VisitConditionalOperator (this=0x7fffff8001b0, E=0x2c5951f) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:8212
+#14 0x0000555559cb2cd9 in (anonymous namespace)::IntExprEvaluator::VisitCastExpr (this=0x7fffff8001b0, E=0x55555e16c8c0) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:15228
+#15 0x0000555559bd8fa1 in Evaluate (Result=..., Info=..., E=E@entry=0x55555e16c8c0) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:16641
+#16 0x0000555559c32406 in (anonymous namespace)::DataRecursiveIntBinOpEvaluator::EvaluateExpr (this=0x7fffff800450, E=0x55555e16c8c0, Result=...) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:14118
+#17 (anonymous namespace)::DataRecursiveIntBinOpEvaluator::process (this=0x7fffff800450, Result=...) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:14300
+#18 (anonymous namespace)::DataRecursiveIntBinOpEvaluator::Traverse (this=0x7fffff800450, E=<optimized out>) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:14084
+#19 (anonymous namespace)::IntExprEvaluator::VisitBinaryOperator (this=<optimized out>, E=<optimized out>) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:14751
+#20 0x0000555559cb2cd9 in (anonymous namespace)::IntExprEvaluator::VisitCastExpr (this=0x7fffff800d10, E=0x55555e16c970) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:15228
+#21 0x0000555559bd8fa1 in Evaluate (Result=..., Info=..., E=E@entry=0x55555e16c970) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:16641
+#22 0x0000555559c1a525 in EvaluateStmt (Result=..., Info=..., S=<optimized out>, Case=<optimized out>, Case@entry=0x0) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:5624
+#23 0x0000555559c19006 in EvaluateStmt (Result=..., Info=..., S=0x55555e16c998, Case=Case@entry=0x0) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:5634
+#24 0x0000555559bda9dd in HandleFunctionCall (CallLoc=CallLoc@entry=..., Callee=0x55555e14fe38, ObjectArg=ObjectArg@entry=0x0, E=E@entry=0x55555e150248, Args=..., Call=..., Body=0x55555e16c998, Info=..., Result=..., ResultSlot=0x0) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:6666
+#25 0x0000555559c2f4e1 in (anonymous namespace)::ExprEvaluatorBase<(anonymous namespace)::IntExprEvaluator>::handleCallExpr (this=0x7fffff801b90, E=0x55555e150248, Result=..., ResultSlot=0x0) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:8474
+#26 (anonymous namespace)::ExprEvaluatorBase<(anonymous namespace)::IntExprEvaluator>::VisitCallExpr (this=0x7fffff801b90, E=0x55555e150248) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:8268
+#27 (anonymous namespace)::IntExprEvaluator::VisitCallExpr (this=0x7fffff801b90, E=0x55555e150248) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:12934
+#28 0x0000555559c24851 in (anonymous namespace)::IntExprEvaluator::VisitUnaryOperator (this=0x7fffff801b90, E=0x55555e150270) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:15088
+#29 0x0000555559bd8fa1 in Evaluate (Result=..., Info=..., E=E@entry=0x55555e150270) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:16641
+#30 0x0000555559c32406 in (anonymous namespace)::DataRecursiveIntBinOpEvaluator::EvaluateExpr (this=0x7fffff801e30, E=0x55555e150270, Result=...) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:14118
+#31 (anonymous namespace)::DataRecursiveIntBinOpEvaluator::process (this=0x7fffff801e30, Result=...) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:14300
+#32 (anonymous namespace)::DataRecursiveIntBinOpEvaluator::Traverse (this=0x7fffff801e30, E=<optimized out>) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:14084
+#33 (anonymous namespace)::IntExprEvaluator::VisitBinaryOperator (this=<optimized out>, E=<optimized out>) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:14751
+#34 0x0000555559bd8fa1 in Evaluate (Result=..., Info=..., E=E@entry=0x55555e1502a0) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:16641
+#35 0x0000555559cb2f8a in EvaluateAsBooleanCondition (E=0x55555e1502a0, Result=@0x7fffff802690: false, Info=...) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:2769
+#36 (anonymous namespace)::IntExprEvaluator::VisitCastExpr (this=0x7fffff8027f0, E=0x55555e150378) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:15198
+#37 0x0000555559bd8fa1 in Evaluate (Result=..., Info=..., E=0x55555e150378) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:16641
+#38 0x0000555559c5cbcc in EvaluateAsBooleanCondition (E=0x9e, Result=@0x7fffff8028d7: false, Info=...) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:2769
+#39 (anonymous namespace)::ExprEvaluatorBase<(anonymous namespace)::FloatExprEvaluator>::HandleConditionalOperator<clang::ConditionalOperator> (this=0x7fffff802a50, E=0x2c5951f) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:8031
+#40 (anonymous namespace)::ExprEvaluatorBase<(anonymous namespace)::FloatExprEvaluator>::VisitConditionalOperator (this=0x7fffff802a50, E=0x2c5951f) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:8212
+#41 0x0000555559c504db in EvaluateFloat (E=0x55555e150098, Result=..., Info=...) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:15602
+#42 (anonymous namespace)::FloatExprEvaluator::VisitUnaryOperator (this=0x7fffff802ab0, E=0x55555e1503f8) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:15814
+#43 0x0000555559bd918d in EvaluateFloat (E=0x55555e150430, Result=..., Info=...) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:15602
+#44 Evaluate (Result=..., Info=..., E=E@entry=0x55555e150430) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:16650
+#45 0x0000555559cb2f8a in EvaluateAsBooleanCondition (E=0x55555e150430, Result=@0x7fffff802b90: false, Info=...) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:2769
+#46 (anonymous namespace)::IntExprEvaluator::VisitCastExpr (this=0x7fffff802cf0, E=0x55555e150450) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:15198
+#47 0x0000555559bd8fa1 in Evaluate (Result=..., Info=..., E=0x55555e150450) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:16641
+#48 0x0000555559c24932 in EvaluateAsBooleanCondition (E=0x9e, Result=@0x7fffff802de0: 224, Info=...) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:2769
+#49 (anonymous namespace)::IntExprEvaluator::VisitUnaryOperator (this=0x7fffff802ff0, E=0x55555e150468) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:15114
+#50 0x0000555559cb2cd9 in (anonymous namespace)::IntExprEvaluator::VisitCastExpr (this=0x7fffff802ff0, E=0x55555e1504a0) at /home/user/repo/llvm-project/clang/lib/AST/ExprConstant.cpp:15228

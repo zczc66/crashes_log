@@ -1,0 +1,40 @@
+PoC：
+
+int main ( ) { struct list_el { int val ; int * ( * state ) [ ( { for ( cnt = 0 ; cnt < thousands_len ; ++ cnt ) if ( thousands [ cnt ] != end [ ( ( y >> 4 & 1 ) * xtime ( printf ( "sum = %d\n" , ( { struct list_el { int val ; int * ( * state ) [ ( { for ( i ^= 1 ; i <= LAST ; i ++ ) { struct list_el { int * ctx ; struct list_el * next ; } j = 0B1010 , Rcon [ 11 ] = { 0x8d , 0x01 , 0x02 , j , 0x08 , 0x10 , create_float_dialog_entry ( cnt < cnt , & x ) , 0x40 , 0x80 , 0x1b , 0x36 } ; } extern struct list_el { int val ; struct list_el * Rcon [ 0xd5 ] ; } flagB ; } ) ] [ i ] ; } i , sum = 0 ; d = ( * state ) [ i ] [ 3 ] ; printf ( "sum = %d\n" , sum ) ; return 0 ; } ) ) ) ) ] ) break ; extern int flagB ; } ) ] [ i ] ; } y [ 1 / ( ( 0x3c << 1 ) ) ] , t ; val = U'\u00b5' == 1 / ( 1 + 0x17 ) | 0x12345678 ; val = ( val << 64 ) | val ; unsigned __int128 rotated = ( val >> 32 ) | ( val << 96 ) ; return ( rotated == ( 1 / ( ( - 1 + - ( __int128 ( ) ) ) ) ) ) ? 1 : 0 ; }
+
+
+Reproduction:
+gdb -q --batch \
+    -x gdb_bt.cmd \
+    --args /home/user/repo/llvm-project/gllvm_build/bin/clang-fuzzer poc
+
+
+
+Crashing thread backtrace:
+Program received signal SIGSEGV, Segmentation fault.
+clang::Decl::castFromDeclContext (D=0x0) at /home/user/repo/llvm-project/clang/lib/AST/DeclBase.cpp:1056
+1056	  Decl::Kind DK = D->getDeclKind();
+#0  clang::Decl::castFromDeclContext (D=0x0) at /home/user/repo/llvm-project/clang/lib/AST/DeclBase.cpp:1056
+#1  0x00005555582f7351 in clang::cast_convert_decl_context<clang::Decl, false>::doit (Val=<optimized out>) at /home/user/repo/llvm-project/clang/include/clang/AST/DeclBase.h:2811
+#2  llvm::cast_convert_val<clang::Decl, clang::DeclContext*, clang::DeclContext*>::doit (Val=<optimized out>) at /home/user/repo/llvm-project/clang/include/clang/AST/DeclBase.h:2866
+#3  llvm::CastInfo<clang::Decl, clang::DeclContext*, void>::doCast (f=<optimized out>) at /home/user/repo/llvm-project/llvm/include/llvm/Support/Casting.h:482
+#4  llvm::cast<clang::Decl, clang::DeclContext> (Val=<optimized out>) at /home/user/repo/llvm-project/llvm/include/llvm/Support/Casting.h:579
+#5  clang::Sema::checkTypeSupport (this=0x55555e13c7b0, Ty=..., Loc=..., D=0x55555e14ff78) at /home/user/repo/llvm-project/clang/lib/Sema/Sema.cpp:2125
+#6  0x00005555585765b1 in clang::Sema::ActOnFinishFunctionBody (this=0x55555e13c7b0, dcl=<optimized out>, Body=<optimized out>, IsInstantiation=56) at /home/user/repo/llvm-project/clang/lib/Sema/SemaDecl.cpp:16704
+#7  0x0000555557f49eca in clang::Parser::ParseFunctionStatementBody (this=0x55555e149860, Decl=0x55555e14ff78, BodyScope=...) at /home/user/repo/llvm-project/clang/lib/Parse/ParseStmt.cpp:2402
+#8  0x0000555557e0048d in clang::Parser::ParseFunctionDefinition (this=0x55555e149860, D=..., TemplateInfo=..., LateParsedAttrs=0x7fffffff8a58) at /home/user/repo/llvm-project/clang/lib/Parse/Parser.cpp:1449
+#9  0x0000555557e3d1da in clang::Parser::ParseDeclGroup (this=0x55555e149860, DS=..., Context=clang::DeclaratorContext::File, Attrs=..., TemplateInfo=..., DeclEnd=0x0, FRI=0x0) at /home/user/repo/llvm-project/clang/lib/Parse/ParseDecl.cpp:2238
+#10 0x0000555557dfe72d in clang::Parser::ParseDeclOrFunctionDefInternal (this=this@entry=0x55555e149860, Attrs=..., DeclSpecAttrs=..., DS=..., AS=AS@entry=clang::AS_none) at /home/user/repo/llvm-project/clang/lib/Parse/Parser.cpp:1187
+#11 0x0000555557dfd9ee in clang::Parser::ParseDeclarationOrFunctionDefinition (this=this@entry=0x55555e149860, Attrs=..., DeclSpecAttrs=..., DS=DS@entry=0x55555e149860, AS=AS@entry=clang::AS_none) at /home/user/repo/llvm-project/clang/lib/Parse/Parser.cpp:1209
+#12 0x0000555557dfbfef in clang::Parser::ParseExternalDeclaration (this=this@entry=0x55555e149860, Attrs=..., DeclSpecAttrs=..., DS=0x7ffff4cf204c, DS@entry=0x0) at /home/user/repo/llvm-project/clang/lib/Parse/Parser.cpp:1032
+#13 0x0000555557df9357 in clang::Parser::ParseTopLevelDecl (this=this@entry=0x55555e149860, Result=..., ImportState=@0x7fffffffa164: clang::Sema::ModuleImportState::FirstDecl) at /home/user/repo/llvm-project/clang/lib/Parse/Parser.cpp:745
+#14 0x0000555557df896e in clang::Parser::ParseFirstTopLevelDecl (this=0x55555e149860, Result=..., ImportState=@0x7fffffffa164: clang::Sema::ModuleImportState::FirstDecl) at /home/user/repo/llvm-project/clang/lib/Parse/Parser.cpp:601
+#15 0x0000555557df184b in clang::ParseAST (S=..., PrintStats=false, SkipFunctionBodies=<optimized out>) at /home/user/repo/llvm-project/clang/lib/Parse/ParseAST.cpp:169
+#16 0x0000555557c8064c in clang::FrontendAction::Execute (this=0x7ffff4cf2010) at /home/user/repo/llvm-project/clang/lib/Frontend/FrontendAction.cpp:1221
+#17 0x0000555557b51601 in clang::CompilerInstance::ExecuteAction (this=0x7fffffffa320, Act=...) at /home/user/repo/llvm-project/clang/lib/Frontend/CompilerInstance.cpp:1055
+#18 0x0000555557b085d7 in clang::tooling::FrontendActionFactory::runInvocation (this=0x55555e0a4e80, Invocation=..., Files=0x55555e091800, PCHContainerOps=..., DiagConsumer=0x7fffffffa500) at /home/user/repo/llvm-project/clang/lib/Tooling/Tooling.cpp:463
+#19 0x00005555558d1a8e in clang_fuzzer::HandleCXX (S="int main ( ) { struct list_el { int val ; int * ( * state ) [ ( { for ( cnt = 0 ; cnt < thousands_len ; ++ cnt ) if ( thousands [ cnt ] != end [ ( ( y >> 4 & 1 ) * xtime ( printf ( \"sum = %d\\n\" , ( { "..., FileName=<optimized out>, ExtraArgs=std::vector of length 1, capacity 1 = {...}) at /home/user/repo/llvm-project/clang/tools/clang-fuzzer/handle-cxx/handle_cxx.cpp:49
+#20 0x00005555558d1434 in LLVMFuzzerTestOneInput (data=0x7ffff4bf1010 "int main ( ) { struct list_el { int val ; int * ( * state ) [ ( { for ( cnt = 0 ; cnt < thousands_len ; ++ cnt ) if ( thousands [ cnt ] != end [ ( ( y >> 4 & 1 ) * xtime ( printf ( \"sum = %d\\n\" , ( { "..., size=<optimized out>) at /home/user/repo/llvm-project/clang/tools/clang-fuzzer/ClangFuzzer.cpp:23
+#21 0x000055555c55452e in ExecuteFilesOnyByOne (argc=2, argv=0x7fffffffe508, callback=callback@entry=0x5555558d12f0 <LLVMFuzzerTestOneInput(uint8_t*, size_t)>) at aflpp_driver.c:256
+#22 0x000055555c55431e in LLVMFuzzerRunDriver (argcp=argcp@entry=0x7fffffffe3d4, argvp=argvp@entry=0x7fffffffe3d8, callback=0x5555558d12f0 <LLVMFuzzerTestOneInput(uint8_t*, size_t)>) at aflpp_driver.c:377
+#23 0x000055555c553e5e in main (argc=2, argv=0x7fffffffe508) at aflpp_driver.c:312
